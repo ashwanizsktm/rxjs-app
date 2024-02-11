@@ -2,9 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Course, sortCoursesBySeqNo } from '../model/course';
 import { interval, noop, Observable, of, throwError, timer } from 'rxjs';
 import { catchError, delay, delayWhen, filter, finalize, map, retryWhen, shareReplay, tap } from 'rxjs/operators';
-import { HttpClient } from '@angular/common/http';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { CourseDialogComponent } from '../course-dialog/course-dialog.component';
 import { CourseService } from '../services/course.service';
 
 
@@ -18,22 +15,18 @@ export class HomeComponent implements OnInit {
 	beginnerCourses$: Observable<Course[]>;
 	advancedCourses$: Observable<Course[]>;
 
-	constructor(private courseSrv: CourseService,
-		private dialog: MatDialog) {
+	constructor(private courseSrv: CourseService) {
 	}
 
 	ngOnInit() {
+		this.reloadCourses();
+	}
+
+	reloadCourses() {
 		const courses$ = this.courseSrv.loadCourses().pipe(map(course => course.sort(sortCoursesBySeqNo)));
 		this.beginnerCourses$ = courses$.pipe(map(course => course.filter(course => course.category === 'BEGINNER')));
 		this.advancedCourses$ = courses$.pipe(map(course => course.filter(course => course.category === 'ADVANCED')));
 	}
 
-	editCourse(course: Course) {
-		const dialogConfig = new MatDialogConfig();
-		dialogConfig.disableClose = true;
-		dialogConfig.autoFocus = true;
-		dialogConfig.width = "400px";
-		dialogConfig.data = course;
-		const dialogRef = this.dialog.open(CourseDialogComponent, dialogConfig);
-	}
+	
 }
